@@ -1,0 +1,39 @@
+
+version: 2
+
+models:
+  - name: jobs_master
+    description: "A database of all jobs"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+      - name: title
+        description: "The primary key for this table"
+      - name: company
+        description: "The primary key for this table"
+      - name: place
+        description: "The primary key for this table"
+      - name: date_posted
+        description: "The primary key for this table"
+  - name: jobs
+    description: "A database of all jobs"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+      - name: job_id
+        description: "staging database"
+      - name: title
+        description: "The primary key for this table"
+      - name: company
+        description: "The primary key for this table"
+      - name: place
+        description: "The primary key for this table"
+      - name: date_posted
+        description: "The primary key for this table"
+    

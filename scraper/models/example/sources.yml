@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: source_db
+    description: "Raw data from the source PostgreSQL database."
+    database: source_db
+    schema: public
+    tables:
+      - name: jobs
+        description: "List of jobs"
+      - name: jobs_id_seq
+        description: "sequence for serial implementation"
