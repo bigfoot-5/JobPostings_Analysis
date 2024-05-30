@@ -37,6 +37,17 @@ services:
     # command: python /opt/airflow/elt_script/scraper.py
     volumes:
       - ./elt_script:/opt/airflow/elt_script
+  # llama:
+  #   build:
+  #     context: ./llama
+  #     dockerfile: Dockerfile
+  #   image: llama
+  #   networks:
+  #     - elt_network
+  #   depends_on:
+  #     - source_postgres
+  #   volumes:
+  #     - ./llama:/opt/airflow/llama
 
   # dbt:
   #   platform: linux/amd64
@@ -125,16 +136,4 @@ services:
     environment:
       - LOAD_EX=n
       - EXECUTOR=Local
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-      - AIRFLOW_CONN_DESTINATION_POSTGRES=postgres://postgres:secret@destination_postgres:5434/destination_db
-      - AIRFLOW__CORE__FERNET_KEY=0CQRKB0ISi22ex8VpBxFpO_4IhpikwPZAPLec2ewtWg=
-      - AIRFLOW__WEBSERVER__SECRET_KEY=secret
-      - AIRFLOW_WWW_USER_USERNAME=airflow
-      - AIRFLOW_WWW_USER_PASSWORD=password
-    command: scheduler
-
-networks:
-  elt_network:
-    driver: bridge
-volumes:
-  source_db_data:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_

@@ -20,17 +20,31 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
+# converts data from postgres database to excel spreadsheet
+def db_to_excel():
+    source_config = {
+    'dbname' : 'source_db',
+    'user' : 'postgres',
+    'password': 'secret',
+    'host': 'source_postgres',
+    'port': '5433'
+    }
+    subprocess_env = dict(PGPASSWORD=source_config['password'])
+    sql = "\COPY (select * from jobs_master) TO '/opt/airflow/elt_script/master.csv' DELIMITER ',' CSV HEADER;"
+    remove_jobs= "delete from jobs;"
+    for command in [sql, remove_jobs]:
+        parser = [
+        'psql',
+        '-U', source_config['user'],
+        '-h', source_config['host'],
+        '-d', source_config['dbname'],
+        '-c',
+        command
+        ]
 
-def run_elt_script():
-    script_path = "/opt/airflow/elt_script/scraper.py"
-    result = subprocess.run(["python", script_path],
-                            capture_output=True, text=True)
-    if result.returncode != 0:
-        raise Exception(f"Script failed with error: {result.stderr}")
-    else:
-        print(result.stdout)
+    subprocess.run(parser, env=subprocess_env, check=True)
 
-
+# dags for ETL process
 dag = DAG(
     'elt_and_dbt',
     default_args=default_args,
@@ -44,7 +58,7 @@ t1 = DockerOperator(
     task_id='scraping_task',
     image='scraper',
     api_version='auto',
-    auto_remove=True,
+    auto_remove=False,
     command="python /opt/airflow/elt_script/scraper.py",
     docker_url='unix://var/run/docker.sock',
     network_mode='container:airflow-source_postgres-1',
@@ -62,9 +76,8 @@ t2 = DockerOperator(
         "/root",
         "--project-dir",
         "/dbt",
-        "--full-refresh"
     ],
-    auto_remove=True,
+    auto_remove=False,
     docker_url="unix://var/run/docker.sock",
     network_mode="container:airflow-source_postgres-1",
     mounts=[
@@ -74,5 +87,10 @@ t2 = DockerOperator(
     ],
     dag=dag
 )
+t3 = PythonOperator(
+    task_id='to_excel',
+    python_callable=db_to_excel,
+    dag=dag,
+)
 
-t1 >> t2
+t1 >> t2 >> t3
