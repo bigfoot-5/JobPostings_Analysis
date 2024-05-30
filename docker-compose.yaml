@@ -10,8 +10,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: secret
     volumes:
+      - ./postgres-data:/var/lib/postgresql/data
       - ./source_db_init/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./source_db_init/postings.csv:/postings.csv
+      - ./elt_script/postings.csv:/postings.csv
+      - ./elt_script/master.csv:/master.csv
   # selenium:
   #   image: seleniarm/standalone-chromium:102.0.5005.61
   #   environment:
@@ -32,17 +34,20 @@ services:
       - elt_network
     depends_on:
       - source_postgres
-      # - selenium
+    # command: python /opt/airflow/elt_script/scraper.py
     volumes:
       - ./elt_script:/opt/airflow/elt_script
 
   # dbt:
-  #   image: ghcr.io/dbt-labs/dbt-postgres:1.4.7
+  #   platform: linux/amd64
+  #   image: ghcr.io/dbt-labs/dbt-postgres:1.6.15
   #   networks:
   #     - elt_network
   #   volumes:
-  #     - ./postgres_transformations:/dbt
+  #     - ./scraper:/dbt
   #     - ~/.dbt:/root
+  #   # command: >
+  #   #     run --profiles-dir /root --project-dir /dbt
   #   environment:
   #     DBT_PROFILE: default
   #     DBT_TARGET: dev
@@ -131,3 +136,5 @@ services:
 networks:
   elt_network:
     driver: bridge
+volumes:
+  source_db_data:
