@@ -17,3 +17,8 @@ After cloning the repository run the following commands to start the containers.
 
 `docker compose up -d`
 
+After the containers are up and running we use Airflow to run the containers.
+Go to `localhost:8080` on your Web browser. Then run the Directed Acyclic Graph that is available.
+After the DAG is run successfully, all the information regarding each of the jobs will become available in the form of a CSV file.
+
+- - - - 
